@@ -16,7 +16,7 @@ if (dotenv.error) {
 const port = process.env.PORT || 3000;
 
 // REDIS CONFIGURATION
-config.redis.host = process.env.REDIS_HOST || (process.env.DOCKER ? 'redis' : 'localhost');
+config.redis.host = process.env.REDIS_URL || (process.env.DOCKER ? 'redis' : 'localhost');
 config.redis.port = process.env.REDIS_PORT || 6379;
 config.redis.password = process.env.REDIS_PASSWORD || '';
 
