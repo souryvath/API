@@ -27,7 +27,7 @@ router.get('/v3/covid-19/all', async (req, res) => {
 router.get('/v3/covid-19/countries', async (req, res) => {
 	const { sort, yesterday, twoDaysAgo, allowNull } = req.query;
 	const countries = JSON.parse(await redis.get(wordToBoolean(yesterday) ? keys.yesterday_countries : wordToBoolean(twoDaysAgo) ? keys.twoDaysAgo_countries : keys.countries))
-		.filter(country => country.country.toLowerCase() !== 'world').map(fixApostrophe).map(country => !wordToBoolean(allowNull) ? nameUtils.transformNull(country) : country);
+		.filter(country => country.country.toLowerCase()).map(fixApostrophe).map(country => !wordToBoolean(allowNull) ? nameUtils.transformNull(country) : country);
 	res.send(sort ? countries.sort((a, b) => a[sort] > b[sort] ? -1 : 1) : countries);
 });
 

@@ -56,16 +56,19 @@ const historicalV2 = async (keys, redis) => {
 	// format csv data to response
 	const result = parsedCases.map((_, index) => {
 		const newElement = {
-			country: '', countryInfo: {}, province: null, timeline: { cases: {}, deaths: {}, recovered: {} }
+			country: '', countryInfo: {}, province: null, timeline: []
 		};
 		const cases = Object.values(parsedCases[index]).splice(timelineIndex);
 		const deaths = Object.values(parsedDeaths[index]).splice(timelineIndex);
 		const recovered = Object.values(formatedRecovered[index]).splice(timelineIndex);
 
 		for (let i = 0; i < cases.length; i++) {
-			newElement.timeline.cases[timelineKey[i]] = parseInt(cases[i]);
-			newElement.timeline.deaths[timelineKey[i]] = parseInt(deaths[i]);
-			newElement.timeline.recovered[timelineKey[i]] = parseInt(recovered[i] || 0);
+			newElement.timeline[i] = {
+				date: timelineKey[i],
+				cases: parseInt(cases[i]),
+				deaths: parseInt(deaths[i]),
+				recovered: parseInt(recovered[i] || 0)
+			};
 		}
 
 		// add country info to support iso2/3 queries
@@ -134,16 +137,19 @@ const getHistoricalCountryDataV2 = (data, query, province = null, lastdays = 30)
 	if (countryData.length === 0) return null;
 
 	// overall timeline for country
-	const timeline = { cases: {}, deaths: {}, recovered: {} };
+	const timeline = [];
 	const provinces = [];
 	countryData.forEach((_, index) => {
 		countryData[index].province ? provinces.push(countryData[index].province) : provinces.push('mainland');
 		// loop cases, deaths for each province
-		Object.keys(countryData[index].timeline).forEach((specifier) => {
-			Object.keys(countryData[index].timeline[specifier]).slice(lastdays * -1).forEach((date) => {
-				// eslint-disable-next-line no-unused-expressions
-				timeline[specifier][date] ? timeline[specifier][date] += parseInt(countryData[index].timeline[specifier][date])
-					: timeline[specifier][date] = parseInt(countryData[index].timeline[specifier][date]);
+		countryData[index].timeline.forEach((specifier) => {
+			countryData[index].timeline.slice(lastdays * -1).forEach((item, indexData) => {
+				timeline[indexData] = {
+					date: item.date,
+					cases: timeline[indexData] ? timeline[indexData].cases += parseInt(item.cases) : parseInt(item.cases),
+					deaths: timeline[indexData] ? timeline[indexData].deaths += parseInt(item.deaths) : parseInt(item.deaths),
+					recovered: timeline[indexData] ? timeline[indexData].recovered += parseInt(item.recovered) : parseInt(item.recovered)
+				};
 			});
 		});
 	});
