@@ -1,6 +1,6 @@
 const keys = require('./config.keys.json');
 const logger = require('../utils/logger');
-// const dotenv = require('dotenv').config();
+const dotenv = require('dotenv').config();
 const config = { redis: {} };
 
 if (dotenv.error) {
